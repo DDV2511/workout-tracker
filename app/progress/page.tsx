@@ -27,7 +27,6 @@ export default function ProgressPage() {
     setWaist('');
   };
 
-  // Simple volume data from workouts
   const volumeData = (() => {
     const workouts = getWorkouts().filter(w => w.completed);
     const byDate: { [key: string]: number } = {};
@@ -45,19 +44,55 @@ export default function ProgressPage() {
   })();
 
   const maxVolume = Math.max(...volumeData.map(([, v]) => v), 1);
+  const totalWorkouts = getWorkouts().filter(w => w.completed).length;
+  const totalVolume = volumeData.reduce((sum, [, v]) => sum + v, 0);
 
   return (
-    <div className="space-y-6">
-      <header>
+    <div className="space-y-5">
+      <header className="animate-fade-in">
         <h1 className="text-2xl font-bold">Progress</h1>
+        <p className="text-[#71717a]">Track your gains</p>
       </header>
 
+      {/* Summary Stats */}
+      <div className="grid grid-cols-2 gap-3 animate-fade-in animate-delay-1">
+        <div className="card card-gradient">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-[#22c55e]/20 flex items-center justify-center">
+              <svg className="w-4 h-4 text-[#22c55e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+            </div>
+            <span className="text-xs text-[#71717a] font-medium">WORKOUTS</span>
+          </div>
+          <p className="text-3xl font-bold">{totalWorkouts}</p>
+        </div>
+        <div className="card">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-[#8b5cf6]/20 flex items-center justify-center">
+              <svg className="w-4 h-4 text-[#8b5cf6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <span className="text-xs text-[#71717a] font-medium">VOLUME</span>
+          </div>
+          <p className="text-3xl font-bold text-gradient">{(totalVolume / 1000).toFixed(1)}k</p>
+        </div>
+      </div>
+
       {/* Body Stats Input */}
-      <div className="card">
-        <h3 className="font-medium mb-3">Body Stats</h3>
-        <div className="grid grid-cols-2 gap-3 mb-3">
+      <div className="card animate-fade-in animate-delay-2">
+        <h3 className="font-semibold mb-4 flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-[#22c55e]/20 flex items-center justify-center">
+            <svg className="w-4 h-4 text-[#22c55e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+            </svg>
+          </div>
+          Body Stats
+        </h3>
+        <div className="grid grid-cols-2 gap-3 mb-4">
           <div>
-            <label className="text-xs text-[#a1a1aa] block mb-1">Weight (lbs)</label>
+            <label className="text-xs text-[#71717a] block mb-2">Weight (lbs)</label>
             <input
               type="number"
               value={bodyWeight}
@@ -67,7 +102,7 @@ export default function ProgressPage() {
             />
           </div>
           <div>
-            <label className="text-xs text-[#a1a1aa] block mb-1">Waist (in)</label>
+            <label className="text-xs text-[#71717a] block mb-2">Waist (in)</label>
             <input
               type="number"
               value={waist}
@@ -78,22 +113,32 @@ export default function ProgressPage() {
           </div>
         </div>
         <button onClick={handleSaveStats} className="btn btn-primary w-full">
-          Save
+          Save Stats
         </button>
       </div>
 
       {/* Body Stats History */}
       {stats.length > 0 && (
-        <div className="card">
-          <h3 className="font-medium mb-3">Weight History</h3>
+        <div className="card animate-fade-in animate-delay-3">
+          <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-[#8b5cf6]/20 flex items-center justify-center">
+              <svg className="w-4 h-4 text-[#8b5cf6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            Weight History
+          </h3>
           <div className="space-y-2">
             {stats
               .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
               .slice(0, 5)
               .map((s) => (
-                <div key={s.date} className="flex justify-between text-sm">
-                  <span className="text-[#a1a1aa]">{s.date}</span>
-                  <span>{s.weight} lbs {s.waist ? `• ${s.waist}"` : ''}</span>
+                <div key={s.date} className="flex justify-between items-center py-2 border-b border-[#27272a] last:border-0">
+                  <span className="text-sm text-[#71717a]">{s.date}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="font-medium">{s.weight} lbs</span>
+                    {s.waist > 0 && <span className="text-sm text-[#71717a]">{s.waist}"</span>}
+                  </div>
                 </div>
               ))}
           </div>
@@ -102,16 +147,23 @@ export default function ProgressPage() {
 
       {/* Volume Chart */}
       {volumeData.length > 1 && (
-        <div className="card">
-          <h3 className="font-medium mb-3">Volume (Last 10 workouts)</h3>
-          <div className="flex items-end gap-1 h-32">
+        <div className="card animate-fade-in">
+          <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-[#22c55e]/20 flex items-center justify-center">
+              <svg className="w-4 h-4 text-[#22c55e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+            </div>
+            Volume (Last 10 workouts)
+          </h3>
+          <div className="flex items-end gap-1 h-40">
             {volumeData.map(([date, volume], i) => (
-              <div key={i} className="flex-1 flex flex-col items-center">
+              <div key={i} className="flex-1 flex flex-col items-center group">
                 <div
-                  className="w-full bg-[#22c55e] rounded-t"
-                  style={{ height: `${(volume / maxVolume) * 100}%` }}
+                  className="w-full bg-gradient-to-t from-[#22c55e] to-[#4ade80] rounded-t transition-all hover:opacity-80"
+                  style={{ height: `${Math.max((volume / maxVolume) * 100, 4)}%` }}
                 />
-                <span className="text-[8px] text-[#a1a1aa] mt-1 rotate-0">
+                <span className="text-[10px] text-[#71717a] mt-2 rotate-0">
                   {date.slice(5)}
                 </span>
               </div>
@@ -119,20 +171,6 @@ export default function ProgressPage() {
           </div>
         </div>
       )}
-
-      {/* Stats Summary */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="card">
-          <p className="text-sm text-[#a1a1aa]">Total Workouts</p>
-          <p className="text-2xl font-bold">{getWorkouts().filter(w => w.completed).length}</p>
-        </div>
-        <div className="card">
-          <p className="text-sm text-[#a1a1aa]">Total Volume</p>
-          <p className="text-2xl font-bold text-primary">
-            {(volumeData.reduce((sum, [, v]) => sum + v, 0) / 1000).toFixed(1)}k
-          </p>
-        </div>
-      </div>
     </div>
   );
 }

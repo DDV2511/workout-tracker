@@ -27,7 +27,6 @@ export default function WorkoutPage({ params }: Props) {
       const prev = getLastWorkoutByType(w.id);
       setPreviousWorkout(prev);
       
-      // Initialize exercises with default sets
       const initExercises: { [key: string]: SetLog[] } = {};
       w.exercises.forEach((ex: Exercise) => {
         initExercises[ex.id] = Array(ex.defaultSets).fill(null).map(() => ({
@@ -48,7 +47,6 @@ export default function WorkoutPage({ params }: Props) {
       }, 1000);
     } else if (timerActive && timerSeconds === 0) {
       setTimerActive(false);
-      // Play notification sound
       if (typeof window !== 'undefined') {
         const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQs3fMHO6b19EzZpluW5mXCMYGqR3LV2eW9jYX+Qt9ibe3J0dJOst9yefH2AiJJ/dHZ0j6W1oH15gIuNfnd4f5CnsZR7d3+Pl6aXhHZ5g5GWoIx5eX+Pl6GQgXZ5g5GWoIx5eX+Pl6GQgXZ5g5GW');
         audio.play().catch(() => {});
@@ -108,72 +106,85 @@ export default function WorkoutPage({ params }: Props) {
   if (!workout) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <p className="text-[#a1a1aa]">Workout not found</p>
+        <p className="text-[#71717a]">Workout not found</p>
       </div>
     );
   }
 
   const completedSets = Object.values(exercises).flat().filter(s => s.completed).length;
   const totalSets = Object.values(exercises).flat().length;
+  const progress = totalSets > 0 ? Math.round((completedSets / totalSets) * 100) : 0;
 
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <Link href="/" className="text-[#a1a1aa] hover:text-white">
-          ← Back
+      <div className="flex items-center justify-between animate-fade-in">
+        <Link href="/" className="w-10 h-10 rounded-lg bg-[#27272a] flex items-center justify-center text-[#71717a] hover:text-white hover:bg-[#3f3f46] transition-colors">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
         </Link>
         <div className="text-right">
-          <p className="font-medium">{workout.name}</p>
-          <p className="text-sm text-[#a1a1aa]">{completedSets}/{totalSets} sets</p>
+          <p className="font-semibold">{workout.name}</p>
+          <p className="text-sm text-[#71717a]">{completedSets}/{totalSets} sets</p>
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div className="card card-gradient animate-fade-in animate-delay-1">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-medium">Progress</span>
+          <span className="text-sm text-[#22c55e] font-semibold">{progress}%</span>
+        </div>
+        <div className="h-2 bg-[#27272a] rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-gradient-to-r from-[#22c55e] to-[#4ade80] transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
         </div>
       </div>
 
       {/* Exercises */}
-      {workout.exercises.map((exercise: Exercise) => (
-        <div key={exercise.id} className="card">
-          <h3 className="font-medium mb-3">{exercise.name}</h3>
+      {workout.exercises.map((exercise: Exercise, exIndex: number) => (
+        <div key={exercise.id} className={`card animate-fade-in`} style={{ animationDelay: `${0.1 * exIndex + 0.1}s` }}>
+          <h3 className="font-semibold mb-4">{exercise.name}</h3>
           
           {/* Sets header */}
-          <div className="grid grid-cols-4 gap-2 text-xs text-[#a1a1aa] mb-2">
+          <div className="grid grid-cols-5 gap-2 text-xs text-[#71717a] mb-3 px-1">
             <span>SET</span>
-            <span>PREVIOUS</span>
-            <span>WEIGHT</span>
-            <span>REPS</span>
+            <span className="col-span-2 text-center">WEIGHT</span>
+            <span className="col-span-2 text-center">REPS</span>
           </div>
           
           {/* Sets */}
           {exercises[exercise.id]?.map((set, setIndex) => (
-            <div key={setIndex} className="grid grid-cols-4 gap-2 mb-2 items-center">
+            <div key={setIndex} className="grid grid-cols-5 gap-2 mb-2 items-center">
               <button
                 onClick={() => toggleSetComplete(exercise.id, setIndex)}
-                className={`w-10 h-10 rounded-lg font-medium text-sm transition-colors ${
-                  set.completed
-                    ? 'bg-[#22c55e] text-black'
-                    : 'bg-[#27272a] text-[#a1a1aa] hover:bg-[#3f3f46]'
-                }`}
+                className={`set-btn ${set.completed ? 'set-btn-completed' : 'set-btn-incomplete'}`}
               >
                 {setIndex + 1}
               </button>
               
-              <span className="text-sm text-[#a1a1aa]">
-                {getPreviousWeight(exercise.id, setIndex) || '—'}
-              </span>
-              
-              <input
-                type="number"
-                value={set.weight || ''}
-                onChange={(e) => updateSet(exercise.id, setIndex, 'weight', parseInt(e.target.value) || 0)}
-                placeholder="0"
-                className="input text-center"
-              />
+              <div className="col-span-2 flex items-center gap-1">
+                <input
+                  type="number"
+                  value={set.weight || ''}
+                  onChange={(e) => updateSet(exercise.id, setIndex, 'weight', parseInt(e.target.value) || 0)}
+                  placeholder="0"
+                  className="input text-center"
+                />
+                {getPreviousWeight(exercise.id, setIndex) > 0 && (
+                  <span className="text-xs text-[#71717a] absolute -right-8 hidden">{getPreviousWeight(exercise.id, setIndex)}</span>
+                )}
+              </div>
               
               <input
                 type="number"
                 value={set.reps || ''}
                 onChange={(e) => updateSet(exercise.id, setIndex, 'reps', parseInt(e.target.value) || 0)}
                 placeholder="0"
-                className="input text-center"
+                className="input text-center col-span-2"
               />
             </div>
           ))}
@@ -181,17 +192,24 @@ export default function WorkoutPage({ params }: Props) {
       ))}
 
       {/* Timer */}
-      <div className="card">
-        <p className="text-sm text-[#a1a1aa] mb-3">REST TIMER</p>
+      <div className="card animate-fade-in animate-delay-3">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 rounded-lg bg-[#8b5cf6]/20 flex items-center justify-center">
+            <svg className="w-4 h-4 text-[#8b5cf6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <span className="text-sm font-medium">REST TIMER</span>
+        </div>
         <div className="flex gap-2">
           {[60, 90, 120, 180].map((secs) => (
             <button
               key={secs}
               onClick={() => startTimer(secs)}
-              className={`flex-1 py-2 rounded-lg text-sm ${
+              className={`flex-1 py-3 rounded-lg text-sm font-medium transition-all ${
                 timerDuration === secs && timerActive
-                  ? 'bg-[#3b82f6] text-white'
-                  : 'bg-[#27272a] text-[#a1a1aa] hover:bg-[#3f3f46]'
+                  ? 'bg-[#8b5cf6] text-white glow-purple'
+                  : 'bg-[#27272a] text-[#71717a] hover:bg-[#3f3f46] hover:text-white'
               }`}
             >
               {secs}s
@@ -203,20 +221,23 @@ export default function WorkoutPage({ params }: Props) {
       {/* Finish */}
       <button
         onClick={finishWorkout}
-        className="btn btn-primary w-full"
+        className="btn btn-primary w-full text-lg py-4 animate-fade-in"
       >
-        Finish Workout ✓
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+        </svg>
+        Finish Workout
       </button>
 
       {/* Timer Overlay */}
       {timerActive && (
         <div className="timer-overlay" onClick={() => setTimerActive(false)}>
           <div className="text-center">
-            <p className="text-[#a1a1aa] mb-4">REST</p>
-            <p className="timer-display text-[#22c55e]">
+            <p className="text-[#71717a] text-lg mb-4 font-medium">REST</p>
+            <p className="timer-display animate-pulse-green">
               {Math.floor(timerSeconds / 60)}:{(timerSeconds % 60).toString().padStart(2, '0')}
             </p>
-            <p className="text-[#a1a1aa] mt-4">Tap to dismiss</p>
+            <p className="text-[#71717a] mt-8">Tap anywhere to dismiss</p>
           </div>
         </div>
       )}
