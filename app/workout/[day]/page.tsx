@@ -62,6 +62,10 @@ export default function WorkoutPage({ params }: Props) {
   };
 
   const toggleSetComplete = (exerciseId: string, setIndex: number) => {
+    // Haptic feedback on mobile
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(50);
+    }
     setExercises((prev) => ({
       ...prev,
       [exerciseId]: prev[exerciseId].map((s, i) =>
