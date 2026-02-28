@@ -150,15 +150,21 @@ export default function WorkoutPage({ params }: Props) {
           <h3 className="font-semibold mb-4">{exercise.name}</h3>
           
           {/* Sets header */}
-          <div className="grid grid-cols-5 gap-2 text-xs text-[#71717a] mb-3 px-1">
+          <div className="grid grid-cols-6 gap-1 text-xs text-[#71717a] mb-3 px-1">
             <span>SET</span>
             <span className="col-span-2 text-center">WEIGHT</span>
             <span className="col-span-2 text-center">REPS</span>
+            <span className="text-right text-[10px]">PREV</span>
           </div>
           
           {/* Sets */}
-          {exercises[exercise.id]?.map((set, setIndex) => (
-            <div key={setIndex} className="grid grid-cols-5 gap-2 mb-2 items-center">
+          {exercises[exercise.id]?.map((set, setIndex) => {
+            const prevWeight = getPreviousWeight(exercise.id, setIndex);
+            const prevExercise = previousWorkout?.exercises.find(e => e.exerciseId === exercise.id);
+            const prevReps = prevExercise?.sets[setIndex]?.reps || 0;
+            
+            return (
+            <div key={setIndex} className="grid grid-cols-6 gap-1 mb-2 items-center">
               <button
                 onClick={() => toggleSetComplete(exercise.id, setIndex)}
                 className={`set-btn ${set.completed ? 'set-btn-completed' : 'set-btn-incomplete'}`}
@@ -166,17 +172,14 @@ export default function WorkoutPage({ params }: Props) {
                 {setIndex + 1}
               </button>
               
-              <div className="col-span-2 flex items-center gap-1">
+              <div className="col-span-2">
                 <input
                   type="number"
                   value={set.weight || ''}
                   onChange={(e) => updateSet(exercise.id, setIndex, 'weight', parseInt(e.target.value) || 0)}
                   placeholder="0"
-                  className="input text-center"
+                  className="input text-center w-full"
                 />
-                {getPreviousWeight(exercise.id, setIndex) > 0 && (
-                  <span className="text-xs text-[#71717a] absolute -right-8 hidden">{getPreviousWeight(exercise.id, setIndex)}</span>
-                )}
               </div>
               
               <input
@@ -184,10 +187,17 @@ export default function WorkoutPage({ params }: Props) {
                 value={set.reps || ''}
                 onChange={(e) => updateSet(exercise.id, setIndex, 'reps', parseInt(e.target.value) || 0)}
                 placeholder="0"
-                className="input text-center col-span-2"
+                className="input text-center col-span-2 w-full"
               />
+              
+              {prevWeight > 0 && (
+                <span className="text-xs text-[#71717a] text-right pr-1">
+                  {prevWeight}×{prevReps}
+                </span>
+              )}
+              {!prevWeight && <span></span>}
             </div>
-          ))}
+          )})}
         </div>
       ))}
 
