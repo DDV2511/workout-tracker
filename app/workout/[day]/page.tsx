@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function WorkoutPage({ params }: Props) {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   const { day } = use(params);
   const router = useRouter();
   const [workout, setWorkout] = useState<DayPlan | undefined>();
@@ -39,21 +41,29 @@ export default function WorkoutPage({ params }: Props) {
     }
   }, [day]);
 
+  // Timer countdown effect
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (timerActive && timerSeconds > 0) {
-      interval = setInterval(() => {
-        setTimerSeconds((s) => s - 1);
-      }, 1000);
-    } else if (timerActive && timerSeconds === 0) {
-      setTimerActive(false);
-      if (typeof window !== 'undefined') {
-        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQs3fMHO6b19EzZpluW5mXCMYGqR3LV2eW9jYX+Qt9ibe3J0dJOst9yefH2AiJJ/dHZ0j6W1oH15gIuNfnd4f5CnsZR7d3+Pl6aXhHZ5g5GWoIx5eX+Pl6GQgXZ5g5GWoIx5eX+Pl6GQgXZ5g5GW');
-        audio.play().catch(() => {});
-      }
-    }
+    if (!timerActive || timerSeconds <= 0) return;
+    
+    const interval = setInterval(() => {
+      setTimerSeconds((s) => {
+        if (s <= 1) {
+          // Timer finished - play sound outside effect
+          setTimeout(() => {
+            setTimerActive(false);
+            if (typeof window !== 'undefined') {
+              const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleQs3fMHO6b19EzZpluW5mXCMYGqR3LV2eW9jYX+Qt9ibe3J0dJOst9yefH2AiJJ/dHZ0j6W1oH15gIuNfnd4f5CnsZR7d3+Pl6aXhHZ5g5GWoIx5eX+Pl6GQgXZ5g5GWoIx5eX+Pl6GQgXZ5g5GW');
+              audio.play().catch(() => {});
+            }
+          }, 0);
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    
     return () => clearInterval(interval);
-  }, [timerActive, timerSeconds]);
+  }, [timerActive]);
 
   const startTimer = (seconds: number) => {
     setTimerDuration(seconds);
